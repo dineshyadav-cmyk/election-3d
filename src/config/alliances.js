@@ -1,16 +1,32 @@
 // alliances.js
 // ---------------------------------------------------------------------------
-// Alliance + color configuration (POC assumptions for Bihar 2025 style demo)
-// NOTE (Non-tech PM friendly): These colors are placeholders; they can be
-// adjusted later. We treat each alliance as a single color block.
+// Alliance + color configuration for Bihar 2020 Election Results
+// Based on actual Times of India data for Bihar Assembly Elections 2020
 // ---------------------------------------------------------------------------
 
-// Brighter, higher-luminance palette for clear visibility of small holograms
+// Bihar 2020 Alliance colors (from actual election data)
 export const ALLIANCES = [
-  { id: 'NDA', name: 'NDA', color: '#FFB347' },       // Light saffron
-  { id: 'INDIA', name: 'INDIA Bloc', color: '#2ECC40' }, // Bright green
-  { id: 'OTHERS', name: 'Others', color: '#B39DFF' }   // Soft lavender
+  { id: 'NDA', name: 'NDA', color: '#ff9650' },        // BJP saffron (from API)
+  { id: 'MGB', name: 'Mahagathbandhan', color: '#008000' }, // RJD green (from API) 
+  { id: 'OTH', name: 'Others', color: '#84898B' }      // Others gray (from API)
 ];
+
+// Party-specific colors for detailed visualization
+export const PARTY_COLORS = {
+  'BJP': '#ff9650',    // Saffron
+  'JD(U)': '#00AA5A',  // Green
+  'RJD': '#008000',    // Dark Green  
+  'INC': '#4ba9f0',    // Blue
+  'CPI(ML)(L)': '#84898B', // Gray
+  'AIMIM': '#84898B',  // Gray
+  'HAM-S': '#84898b',  // Gray
+  'VIP': '#84898B',    // Gray
+  'CPI': '#84898B',    // Gray
+  'CPM': '#84898B',    // Gray
+  'BSP': '#84898B',    // Gray
+  'LJP': '#1a64f5',    // Blue
+  'IND': '#84898B'     // Gray
+};
 
 export const UNDECLARED_COLOR = '#777777'; // Neutral gray (brightened for visibility)
 

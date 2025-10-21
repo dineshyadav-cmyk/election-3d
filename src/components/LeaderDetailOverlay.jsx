@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import './LeaderDetailOverlay.css';
 
-export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#ffffff', initialRect }) {
+export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#ffffff', initialRect, leaderData }) {
   const [entered, setEntered] = useState(false);
   const [transitionDone, setTransitionDone] = useState(false);
   const frameRef = useRef(null);
@@ -13,13 +13,24 @@ export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#
   }, []);
 
   const leaderName = useMemo(() => {
+    console.log('leaderData:', leaderData);
+    if (leaderData?.name) return leaderData.name;
     if (!imageSrc) return 'Leader';
     const base = imageSrc.split('/').pop() || '';
     const name = base.replace(/\.[a-zA-Z0-9]+$/, ''); // remove extension
     return name.charAt(0).toUpperCase() + name.slice(1); // capitalize
-  }, [imageSrc]);
+  }, [imageSrc, leaderData]);
 
-  const trailingName = 'Leader6';
+  // Sample Bihar 2020 leader data for demonstration
+  const sampleBiharLeaders = {
+    constituency: leaderData?.constituency || 'Pataliputra',
+    party: leaderData?.party || 'BJP',
+    alliance: leaderData?.alliance || 'NDA',
+    leadingBy: leaderData?.leadingBy || '12,543',
+    trailingCandidate: leaderData?.trailingCandidate || 'Misa Bharti',
+    trailingParty: leaderData?.trailingParty || 'RJD',
+    trailingAlliance: leaderData?.trailingAlliance || 'MGB'
+  };
 
   // shared element image transition
   useEffect(() => {
@@ -80,14 +91,14 @@ export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#
           )}
           <div className="leader-info">
             <h2 id="leader-overlay-title" className="leader-name" style={{ color: partyColor }}>{leaderName}</h2>
-            <div className="field"><span className="label">Constituency:</span><span className="value">Dummy</span></div>
-            <div className="field"><span className="label">Party:</span><span className="value">ABC</span></div>
-            <div className="field"><span className="label">Alliance:</span><span className="value">NDA</span></div>
-            <div className="field"><span className="label">Leading by:</span><span className="value">5,432</span></div>
+            <div className="field"><span className="label">Constituency:</span><span className="value">{sampleBiharLeaders.constituency}</span></div>
+            <div className="field"><span className="label">Party:</span><span className="value">{sampleBiharLeaders.party}</span></div>
+            <div className="field"><span className="label">Alliance:</span><span className="value">{sampleBiharLeaders.alliance}</span></div>
+            <div className="field"><span className="label">Leading by:</span><span className="value">{sampleBiharLeaders.leadingBy}</span></div>
             <div className="divider" />
-            <h3 className="subhead">Trailed by <span className="trailing-name" style={{ color: partyColor }}>{trailingName}</span></h3>
-            <div className="field"><span className="label">Party:</span><span className="value">DEF</span></div>
-            <div className="field"><span className="label">Alliance:</span><span className="value">INDIA</span></div>
+            <h3 className="subhead">Trailed by <span className="trailing-name" style={{ color: partyColor }}>{sampleBiharLeaders.trailingCandidate}</span></h3>
+            <div className="field"><span className="label">Party:</span><span className="value">{sampleBiharLeaders.trailingParty}</span></div>
+            <div className="field"><span className="label">Alliance:</span><span className="value">{sampleBiharLeaders.trailingAlliance}</span></div>
           </div>
         </div>
         <button ref={closeBtnRef} className="close-btn" onClick={onClose} aria-label="Close overlay">×</button>

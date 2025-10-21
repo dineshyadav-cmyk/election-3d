@@ -15,7 +15,8 @@ function SeatFacesLayer({
   randomize = true,
   seed = 1337,
   expandedSeat = null,
-  onFaceClick
+  onFaceClick,
+  constituencyData = [],
 }) {
   const sources = imageSources.length ? imageSources : ['/images/leader.png'];
   const textures = useTexture(sources);
@@ -47,9 +48,19 @@ function SeatFacesLayer({
     const rng = lcg(seed);
     const baseIndices = matrices.map((_, i) => i);
     const shuffled = randomize ? baseIndices.sort(() => rng() - 0.5) : baseIndices;
-    // Map seat index -> image index (wrap through sources)
+    // Map seat index -> image index
     const imgMap = new Array(matrices.length);
-    shuffled.forEach((seatIdx, orderIdx) => { imgMap[seatIdx] = orderIdx % sources.length; });
+    console.log('sources:', sources);
+    console.log('matrices:', matrices);
+    if (randomize) {
+      // Original randomization logic for backward compatibility
+      shuffled.forEach((seatIdx, orderIdx) => { imgMap[seatIdx] = orderIdx % sources.length; });
+    } else {
+      // Direct 1:1 mapping when not randomizing (for dynamic constituency images)
+      matrices.forEach((_, seatIdx) => { 
+        imgMap[seatIdx] = Math.min(seatIdx, sources.length - 1); 
+      });
+    }
 
     const all = matrices.map((m, idx) => {
       basePos.setFromMatrixPosition(m);
@@ -59,6 +70,10 @@ function SeatFacesLayer({
     return { panelGeometry: panelGeom, planeGeometry: planeGeom, positions: all, imageIndexMap: imgMap };
   }, [matrices, width, heightRatio, cornerRadius, randomize, seed, sources.length]);
 
+console.log('11:panelGeometry:', panelGeometry);
+console.log('11:planeGeometry:', planeGeometry);
+console.log('11:positions:', positions);
+console.log('11:imageIndexMap:', imageIndexMap);
   // Animated scale refs (only animate currently expanded seat for simplicity)
   const scaleRef = useRef(1);
   const groupRefs = useRef([]);
@@ -119,8 +134,9 @@ function SeatFacesLayer({
     if (!onFaceClick) return;
     const obj = groupRefs.current[index];
     const initialRect = computeInitialRect(obj);
-    const src = sources[imageIndexMap[index] % textures.length];
-    onFaceClick(index, { imageSrc: src, partyColor, initialRect });
+    const src =  sources[imageIndexMap[index] % textures.length];
+    console.log('constituencyData[index]:', index, constituencyData[index], src, imageIndexMap);
+    onFaceClick(index, { imageSrc: src, partyColor, initialRect, leaderData: constituencyData[index]});
   }
 
   return (

@@ -37,7 +37,7 @@ import LeaderPillar from './LeaderPillar';
  *   to avoid confusion.
  * ---------------------------------------------------------------------------
  */
-function AssemblyLayout({ seatHexColors, leaderSeatIndex = null, leaderFaceSrc = '/images/leader.png', onSeatMatricesReady, expandedSeat = null, onRequestExpand }) {
+function AssemblyLayout({ seatHexColors, seatImageSources, leaderSeatIndex = null, leaderFaceSrc = '/images/leader.png', onSeatMatricesReady, expandedSeat = null, onRequestExpand, constituencyData }) {
   const ROWS_50 = [8, 9, 10, 11, 12];
   const ROWS_CENTER_LEFT = [3, 4, 4, 5, 5];
   const ROWS_CENTER_RIGHT = [4, 4, 5, 5, 4];
@@ -309,10 +309,11 @@ function AssemblyLayout({ seatHexColors, leaderSeatIndex = null, leaderFaceSrc =
         <SeatFacesLayer
           matrices={fabricMatrices}
           seatHexColors={seatHexColors}
-          imageSources={['/images/leader.png','/images/leader2.png','/images/leader3.png','/images/leader4.png','/images/leader5.png']}
-          randomize
+          imageSources={seatImageSources || ['/images/leader.png']}
+          randomize={false}
           seed={20250904}
           expandedSeat={expandedSeat}
+          constituencyData={constituencyData}
           onFaceClick={(idx, meta) => { if (onRequestExpand) onRequestExpand(idx, meta); }}
         />
       )}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useDispatch, useSelector } from 'react-redux';
 import EnhancedCameraControls from './components/EnhancedCameraControls';
 import './App.css';
 import StudioEnvironment from './components/StudioEnvironment';
@@ -10,20 +11,93 @@ import ResultsLegend from './components/ResultsLegend';
 import LeaderDetailOverlay from './components/LeaderDetailOverlay';
 import SpeakerChairIcon from './components/icons/SpeakerChairIcon';
 import TimelineBar from './components/TimelineBar'; // Time seek bar
-import timeline from './data/electionTimeline.json';
+// OLD imports (before Redux migration):
+// import biharTimeline from './data/biharElectionTimeline.json';
+// import { getBiharElectionData } from './services/electionAPI';
+
+// NEW Redux imports:
+import { 
+  fetchBiharElectionData,
+  selectElectionData,
+  selectConstituencyData,
+  selectCurrentTimeline,
+  selectCurrentIndex,
+  selectExpandedSeat,
+  selectLoading,
+  selectError,
+  setCurrentIndex,
+  setExpandedSeat,
+  clearExpandedSeat
+} from './store/slices/electionSlice';
 import { ALLIANCES, UNDECLARED_COLOR, lighterShade } from './config/alliances';
 import { SEAT_BLOCKS, TOTAL_SEATS } from './config/seatBlocks';
 
 // Removed old orthographic CameraController; using EnhancedCameraControls + perspective camera instead.
 
+// redux store
+// assembly members node to be integrated 
+// seat number dynamic from ttl_seats
+// in the overaly add the constituency details leave out the member names and stuff
+// performance perspective image load and display in the overlay
+
+
 function App() {
-  const [currentIndex, setCurrentIndex] = useState(timeline.length - 1); // LIVE by default
+  const dispatch = useDispatch();
+  
+  // OLD local state (before Redux migration):
+  // const [currentIndex, setCurrentIndex] = useState(biharTimeline.length - 1); // LIVE by default
+  // const [constituencyData, setConstituencyData] = useState(null);
+  // const [electionData, setElectionData] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
+
+  // NEW Redux state:
+  const electionData = useSelector(selectElectionData);
+  const constituencyData = useSelector(selectConstituencyData);
+  const currentTimeline = useSelector(selectCurrentTimeline);
+  const currentIndex = useSelector(selectCurrentIndex);
+  const expandedSeat = useSelector(selectExpandedSeat);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
+  // OLD data fetching logic (before Redux migration):
+  // useEffect(() => {
+  //   const loadElectionData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const data = await getBiharElectionData();
+  //       console.log('data:', data);
+  //       setElectionData(data);
+  //       if(data && data.cns_rslt) {
+  //         setConstituencyData(data.cns_rslt);
+  //       }
+  //       setError(null);
+  //     } catch (err) {
+  //       console.error('Failed to load election data:', err);
+  //       setError('Failed to load election data. Using fallback data.');
+  //       // Continue with static timeline data as fallback
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   loadElectionData();
+  // }, []);
+
+  // NEW Redux data fetching:
+  useEffect(() => {
+    dispatch(fetchBiharElectionData());
+  }, [dispatch]);
 
   const seatMap = useMemo(() => SEAT_BLOCKS, []);
 
   const shadeCache = useRef(new Map());
   const seatHexColors = useMemo(() => {
-    const snap = timeline[currentIndex];
+    // Use API data timeline if available, otherwise fallback to static data
+    // const timelineData = electionData?.timeline || biharTimeline;
+    // const snap = timelineData[currentIndex];
+    
+    // Use Redux timeline data
+    const snap = currentTimeline[currentIndex];
     const seatCount = TOTAL_SEATS;
     const seatColorHex = new Array(seatCount).fill(UNDECLARED_COLOR);
     const counts = {};
@@ -46,14 +120,38 @@ function App() {
       }
     }
     return seatColorHex;
-  }, [currentIndex, seatMap]);
+  }, [currentIndex, seatMap, currentTimeline]);
+  // , electionData
+
+  // Generate dynamic image sources based on constituency data (cns_rslt)
+  const seatImageSources = useMemo(() => {
+    if (!constituencyData || !Array.isArray(constituencyData)) {
+      // Fallback to default images if no constituency data
+      return Array(TOTAL_SEATS).fill('/images/leader.png');
+    }
+
+    const seatCount = TOTAL_SEATS;
+    const seatImages = new Array(seatCount).fill('/images/leader.png');
+    
+    // Map constituency data to seat images using cns_id as seat index and lwpl as image ID
+    constituencyData.forEach(constituency => {
+      const seatIndex = constituency.cns_id - 1; // Convert to 0-based index (assuming cns_id is 1-based)
+      const imageId = constituency.lwpl;
+      
+      if (seatIndex >= 0 && seatIndex < seatCount && imageId) {
+        seatImages[seatIndex] = `https://static.toiimg.com/photo/${imageId}.cms`;
+      }
+    });
+
+    return seatImages;
+  }, [constituencyData]);
 
   // Store seat matrices for camera focus (populated via callback from layout later if needed)
   const [seatMatrices, setSeatMatrices] = useState([]);
   const [sphere, setSphere] = useState(null);
   const [camControls, setCamControls] = useState(null);
   const [activePreset, setActivePreset] = useState(null);
-  const [expandedSeat, setExpandedSeat] = useState(null); // seat index currently expanded (only 0 prototype)
+  // const [expandedSeat, setExpandedSeat] = useState(null); // OLD - Now using Redux state
   const [expandedMeta, setExpandedMeta] = useState(null); // { imageSrc, partyColor }
 
   const computeSphere = (mats) => {
@@ -123,10 +221,37 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camControls, sphere, activePreset]);
 
+  // Get current timeline data for UI components (OLD - now using Redux)
+  // const currentTimeline = electionData?.timeline || biharTimeline;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="app-container">
+        <header className="app-header">
+          <h1 className="header-title">Bihar Elections 2020</h1>
+        </header>
+        <div className="canvas-container" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: '80vh',
+          fontSize: '18px',
+          color: '#fff'
+        }}>
+          Loading Bihar Election Data...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
-  <h1 className="header-title" style={{whiteSpace:'nowrap'}}>Bihar Elections'25</h1>
+        <h1 className="header-title" style={{whiteSpace:'nowrap'}}>
+          Bihar Elections 2020
+          {error && <span style={{fontSize: '12px', color: '#ffaa00', display: 'block'}}>({error})</span>}
+        </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button type="button" className={`cam-icon-btn ${activePreset === 'speaker' ? 'active' : ''}`} title="Speaker POV" onClick={() => applyPreset('speaker')}><SpeakerChairIcon active={activePreset === 'speaker'} /></button>
           <button type="button" className={`cam-icon-btn ${activePreset === 'gallery' ? 'active' : ''}`} title="Gallery View" onClick={() => applyPreset('gallery')}>🏛</button>
@@ -164,20 +289,26 @@ function App() {
             <group position={[0,5,0]}>
               <AssemblyLayout
                 seatHexColors={seatHexColors}
+                seatImageSources={seatImageSources}
                 onSeatMatricesReady={(mats) => { setSeatMatrices(mats); const sp = computeSphere(mats); setSphere(sp); }}
                 expandedSeat={expandedSeat}
-                onRequestExpand={(idx, meta) => { setExpandedSeat(idx); setExpandedMeta(meta); }}
+                // onRequestExpand={(idx, meta) => { setExpandedSeat(idx); setExpandedMeta(meta); }}
+                onRequestExpand={(idx, meta) => { dispatch(setExpandedSeat(idx)); setExpandedMeta(meta); }}
+                constituencyData={constituencyData}
               />
             </group>
           </Canvas>
           {/* Timeline UI overlay (HTML) */}
-          <TimelineBar timeline={timeline} currentIndex={currentIndex} onChange={setCurrentIndex} />
-          <ResultsLegend currentIndex={currentIndex} timeline={timeline} />
+          {/* <TimelineBar timeline={currentTimeline} currentIndex={currentIndex} onChange={setCurrentIndex} /> */}
+          <TimelineBar timeline={currentTimeline} currentIndex={currentIndex} onChange={(index) => dispatch(setCurrentIndex(index))} />
+          <ResultsLegend currentIndex={currentIndex} timeline={currentTimeline} />
           {expandedSeat != null && (
             <LeaderDetailOverlay
-              onClose={() => { setExpandedSeat(null); setExpandedMeta(null); }}
+              // onClose={() => { setExpandedSeat(null); setExpandedMeta(null); }}  
+              onClose={() => { dispatch(clearExpandedSeat()); setExpandedMeta(null); }}
               imageSrc={expandedMeta?.imageSrc}
               partyColor={expandedMeta?.partyColor}
+              leaderData={expandedMeta?.leaderData}
             />
           )}
       </div>

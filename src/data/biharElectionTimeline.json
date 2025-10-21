@@ -1,0 +1,90 @@
+[
+  { 
+    "time": "08:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 15, "wins": 0 }, 
+      { "id": "MGB", "leads": 12, "wins": 0 }, 
+      { "id": "OTH", "leads": 2, "wins": 0 } 
+    ] 
+  },
+  { 
+    "time": "09:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 35, "wins": 5 }, 
+      { "id": "MGB", "leads": 28, "wins": 3 }, 
+      { "id": "OTH", "leads": 4, "wins": 0 } 
+    ] 
+  },
+  { 
+    "time": "10:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 55, "wins": 15 }, 
+      { "id": "MGB", "leads": 45, "wins": 12 }, 
+      { "id": "OTH", "leads": 6, "wins": 1 } 
+    ] 
+  },
+  { 
+    "time": "11:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 70, "wins": 25 }, 
+      { "id": "MGB", "leads": 60, "wins": 20 }, 
+      { "id": "OTH", "leads": 7, "wins": 2 } 
+    ] 
+  },
+  { 
+    "time": "12:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 80, "wins": 40 }, 
+      { "id": "MGB", "leads": 70, "wins": 35 }, 
+      { "id": "OTH", "leads": 6, "wins": 3 } 
+    ] 
+  },
+  { 
+    "time": "13:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 65, "wins": 60 }, 
+      { "id": "MGB", "leads": 55, "wins": 50 }, 
+      { "id": "OTH", "leads": 4, "wins": 4 } 
+    ] 
+  },
+  { 
+    "time": "14:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 45, "wins": 80 }, 
+      { "id": "MGB", "leads": 35, "wins": 75 }, 
+      { "id": "OTH", "leads": 3, "wins": 5 } 
+    ] 
+  },
+  { 
+    "time": "15:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 25, "wins": 100 }, 
+      { "id": "MGB", "leads": 20, "wins": 90 }, 
+      { "id": "OTH", "leads": 2, "wins": 6 } 
+    ] 
+  },
+  { 
+    "time": "16:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 10, "wins": 115 }, 
+      { "id": "MGB", "leads": 8, "wins": 102 }, 
+      { "id": "OTH", "leads": 1, "wins": 7 } 
+    ] 
+  },
+  { 
+    "time": "17:00", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 5, "wins": 120 }, 
+      { "id": "MGB", "leads": 3, "wins": 107 }, 
+      { "id": "OTH", "leads": 0, "wins": 8 } 
+    ] 
+  },
+  { 
+    "time": "FINAL", 
+    "alliances": [ 
+      { "id": "NDA", "leads": 0, "wins": 125 }, 
+      { "id": "MGB", "leads": 0, "wins": 110 }, 
+      { "id": "OTH", "leads": 0, "wins": 8 } 
+    ] 
+  }
+]
