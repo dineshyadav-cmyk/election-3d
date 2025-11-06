@@ -45,9 +45,9 @@ const NavigationDot = ({ direction, onClick, isActive, isAnimating }) => {
       case 'gallery_top': return { bottom: '20px', left: '50%', transform: 'translateX(-50%)' };
       case 'speaker_left_high': return { top: '20px', left: '20px' };
       case 'speaker_right_high': return { top: '20px', right: '20px' };
-      case 'speaker_left_low': return { bottom: '20px', left: '20px' };
+      case 'spealer_left_low': return { bottom: '20px', left: '20px' };
       case 'speaker_right_low': return { bottom: '20px', right: '20px' };
-      default: return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+      default: return { };
     }
   };
 
@@ -56,15 +56,15 @@ const NavigationDot = ({ direction, onClick, isActive, isAnimating }) => {
       case 'gallery_top': return '🏛️';
       case 'speaker_left_high': return '↖️';
       case 'speaker_right_high': return '↗️';
-      case 'speaker_left_low': return '↙️';
-      case 'speaker_right_low': return '↘️';
-      default: return '📍';
+      case 'speaker_left_low': return '';
+      case 'speaker_right_low': return '';
+      default: return '';
     }
   };
 
   return (
     <div
-      className={`nav-dot ${isActive ? 'active' : ''} ${isAnimating ? 'animating' : ''} ${hovered ? 'hovered' : ''}`}
+      className={`nav-dot ${direction} ${isActive ? 'active' : ''} ${isAnimating ? 'animating' : ''} ${hovered ? 'hovered' : ''}`}
       style={getScreenPosition()}
       onClick={() => onClick(direction)}
       onMouseEnter={() => setHovered(true)}

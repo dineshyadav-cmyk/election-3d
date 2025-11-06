@@ -15,7 +15,7 @@ function ResultsLegend({ currentIndex, timeline }) {
     <div className="results-legend">
       <div className="legend-head legend-grid">
         <div className="col-label" />
-        <div className="col-center">Wins</div>
+        <div className="col-center">Wins <i className='winsIcon'></i></div>
         <div className="col-center">Leads</div>
       </div>
       {data.map(d => (

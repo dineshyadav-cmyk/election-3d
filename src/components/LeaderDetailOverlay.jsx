@@ -92,12 +92,11 @@ export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#
             </div>
           )}
           <div className="leader-info">
-            <h2 id="leader-overlay-title" className="leader-name" style={{ color: partyColor }}>{leaderName}</h2>
+            <h2 id="leader-overlay-title" className="leader-name">{leaderName}</h2>
             <div className="field"><span className="label">Constituency:</span><span className="value">{sampleBiharLeaders.constituency}</span></div>
             <div className="field"><span className="label">Party:</span><span className="value">{sampleBiharLeaders.party}</span></div>
             <div className="field"><span className="label">Alliance:</span><span className="value">{sampleBiharLeaders.alliance}</span></div>
             <div className="field"><span className="label">Leading by:</span><span className="value">{sampleBiharLeaders.leadingBy}</span></div>
-            <div className="divider" />
             <h3 className="subhead">Trailed by <span className="trailing-name" style={{ color: partyColor }}>{sampleBiharLeaders.trailingCandidate}</span></h3>
             <div className="field"><span className="label">Party:</span><span className="value">{sampleBiharLeaders.trailingParty}</span></div>
             <div className="field"><span className="label">Alliance:</span><span className="value">{sampleBiharLeaders.trailingAlliance}</span></div>

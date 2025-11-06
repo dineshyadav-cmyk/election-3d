@@ -273,14 +273,15 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
+      <i className='arrowBackIcon'></i>
         <h1 className="header-title" style={{whiteSpace:'nowrap'}}>
-          Bihar Elections 2020
+         <strong>Bihar Elections</strong>  2025
           {error && <span style={{fontSize: '12px', color: '#ffaa00', display: 'block'}}>({error})</span>}
         </h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        {/* <div style={{ display: 'flex', gap: '10px' }}>
           <button type="button" className={`cam-icon-btn ${activePreset === 'speaker' ? 'active' : ''}`} title="Speaker POV" onClick={() => applyPreset('speaker')}><SpeakerChairIcon active={activePreset === 'speaker'} /></button>
           <button type="button" className={`cam-icon-btn ${activePreset === 'gallery' ? 'active' : ''}`} title="Gallery View" onClick={() => applyPreset('gallery')}>🏛</button>
-        </div>
+        </div> */}
       </header>
       
       <div className="canvas-container" style={{ position: 'relative' }}>
