@@ -14,22 +14,23 @@ export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#
 
   const leaderName = useMemo(() => {
     console.log('leaderData:', leaderData);
-    if (leaderData?.name) return leaderData.name;
-    if (!imageSrc) return 'Leader';
-    const base = imageSrc.split('/').pop() || '';
-    const name = base.replace(/\.[a-zA-Z0-9]+$/, ''); // remove extension
-    return name.charAt(0).toUpperCase() + name.slice(1); // capitalize
+    if (leaderData?.candidate?.cn) return leaderData.candidate.cn;
+    return 'Leader';
+    // if (!imageSrc) return 'Leader';
+    // const base = imageSrc.split('/').pop() || '';
+    // const name = base.replace(/\.[a-zA-Z0-9]+$/, ''); // remove extension
+    // return name.charAt(0).toUpperCase() + name.slice(1); // capitalize
   }, [imageSrc, leaderData]);
 
   // Sample Bihar 2020 leader data for demonstration
   const sampleBiharLeaders = {
-    constituency: leaderData?.constituency || 'Pataliputra',
-    party: leaderData?.party || 'BJP',
-    alliance: leaderData?.alliance || 'NDA',
-    leadingBy: leaderData?.leadingBy || '12,543',
-    trailingCandidate: leaderData?.trailingCandidate || 'Misa Bharti',
-    trailingParty: leaderData?.trailingParty || 'RJD',
-    trailingAlliance: leaderData?.trailingAlliance || 'MGB'
+    constituency: leaderData?.candidate?.cn || 'NA',
+    party: leaderData?.candidate?.pn || 'NA',
+    alliance: leaderData?.pgnm || 'NA',
+    leadingBy: leaderData?.leadingBy || 'NA',
+    trailingCandidate: leaderData?.candidate?.incn || 'NA',
+    trailingParty: leaderData?.candidate?.inpn || 'NA',
+    trailingAlliance: leaderData?.candidate?.inan || 'NA'
   };
 
   // shared element image transition
@@ -40,6 +41,7 @@ export default function LeaderDetailOverlay({ onClose, imageSrc, partyColor = '#
     const finalRect = frameEl.getBoundingClientRect();
     const img = document.createElement('img');
     img.src = imageSrc;
+    // img.src="/images/leaderupscaled.png";
     img.className = 'leader-image-transition-clone';
     Object.assign(img.style, {
       position: 'fixed',

@@ -70,6 +70,43 @@ const electionSlice = createSlice({
         // Set constituency data if available
         if (action.payload && action.payload.cns_rslt) {
           state.constituencyData = action.payload.cns_rslt;
+          if(Array.isArray(action.payload.cns_rslt)) {
+            state.constituencyData = action.payload.cns_rslt.map(cns => ({
+              ...cns,
+              candidate: {
+                age: 43,
+                an: "NCP",    
+                pn: "NATIONALIST CONGRESS PARTY",
+                cc: "#84898B",
+                lg: "45963157",
+                p_id: 1389,
+                asst: "Nil",
+                c_id: 25908,
+                c_msid: 1,
+                cn: "ANUJ KUMAR MANDAL",    
+                cns_id: 155,
+                cns_name: "Kahalgaon",
+                ns_id: 4,
+                crcase: 0,
+                cs: 4,
+                cun: "ANUJ KUMAR MANDAL",
+                e_id: 4,
+                edu: "",
+                g: -1,
+                img: "0",
+                src: "https://i.postimg.cc/4Kz10j32/leader3.png",
+                // src: "https://i.postimg.cc/FzFx0VrC/leaderupscaled.png",
+                star: false,
+                syn: "",
+                tc: 0,
+                wpurl: "",
+                incn: "Sadanand Singh",
+                inpn: "Indian National Congress",
+                inan: "INC",
+                inpl: "51774625",
+                },
+            }));
+          }
         }
         
         // Update timeline if available in API data

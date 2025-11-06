@@ -8,6 +8,29 @@ import { Billboard, useTexture } from '@react-three/drei';
  * Renders a face card (photo + hologram panel + glow) for every seat matrix provided.
  * Optimized: loads each supplied image exactly once; reuses shared geometries & materials.
  */
+/**
+ * SeatFacesLayer - Leader Photograph Management System
+ * ===================================================
+ * 
+ * Renders leader photographs on each seat with optional hologram effects.
+ * Designed for efficient rendering of 243 face cards with interactive features.
+ * 
+ * Key Features:
+ * - Billboard rendering (faces always face camera)
+ * - Conditional hologram effects (glow + panel)
+ * - Interactive click handling for seat expansion
+ * - Optimized texture loading and geometry reuse
+ * - Mobile-friendly touch controls
+ * 
+ * @param {Array} matrices - 3D transformation matrices for each seat
+ * @param {Array} seatHexColors - Party colors for each seat
+ * @param {Array} imageSources - Image URLs for leader photos
+ * @param {boolean} randomize - Whether to randomize photo assignment
+ * @param {number} seed - Random seed for consistent photo distribution
+ * @param {number|null} expandedSeat - Currently expanded seat index
+ * @param {Function} onFaceClick - Click handler for seat interaction
+ * @param {boolean} disableHolograms - Whether to disable hologram effects
+ */
 function SeatFacesLayer({
   matrices,
   seatHexColors = [],
@@ -17,6 +40,7 @@ function SeatFacesLayer({
   expandedSeat = null,
   onFaceClick,
   constituencyData = [],
+  disableHolograms = false,
 }) {
   const sources = imageSources.length ? imageSources : ['/images/leader.png'];
   const textures = useTexture(sources);
@@ -172,30 +196,51 @@ console.log('11:imageIndexMap:', imageIndexMap);
             onPointerCancel={() => { pointerStateRef.current = null; }}
           >
             <Billboard follow>
-              {/* Glow */}
-              <mesh position={[0, 0, -0.014]} scale={[glowScale, glowScale, 1]} geometry={panelGeometry} renderOrder={isExpanded ? 101 : 10}>
-                <meshBasicMaterial
-                  color={partyColor}
-                  transparent
-                  opacity={glowOpacity}
-                  blending={THREE.AdditiveBlending}
-                  depthWrite={false}
-                  depthTest
-                />
-              </mesh>
-              {/* Panel */}
-              <mesh position={[0, 0, -0.007]} geometry={panelGeometry} renderOrder={isExpanded ? 102 : 11}>
-                <meshBasicMaterial
-                  color={partyColor}
-                  transparent
-                  opacity={0.18}
-                  depthWrite={false}
-                  polygonOffset
-                  polygonOffsetFactor={1}
-                  polygonOffsetUnits={1}
-                />
-              </mesh>
-              {/* Photo */}
+              {/* 
+                HOLOGRAM GLOW EFFECT
+                ====================
+                Creates a subtle glow around the photograph when holograms are enabled.
+                Uses additive blending for a luminous effect.
+              */}
+              {!disableHolograms && (
+                <mesh position={[0, 0, -0.014]} scale={[glowScale, glowScale, 1]} geometry={panelGeometry} renderOrder={isExpanded ? 101 : 10}>
+                  <meshBasicMaterial
+                    color={partyColor}
+                    transparent
+                    opacity={glowOpacity}
+                    blending={THREE.AdditiveBlending}
+                    depthWrite={false}
+                    depthTest
+                  />
+                </mesh>
+              )}
+              
+              {/* 
+                HOLOGRAM PANEL BACKGROUND
+                =========================
+                Creates a semi-transparent panel behind the photograph when holograms are enabled.
+                Provides depth and visual separation from the seat.
+              */}
+              {!disableHolograms && (
+                <mesh position={[0, 0, -0.007]} geometry={panelGeometry} renderOrder={isExpanded ? 102 : 11}>
+                  <meshBasicMaterial
+                    color={partyColor}
+                    transparent
+                    opacity={0.18}
+                    depthWrite={false}
+                    polygonOffset
+                    polygonOffsetFactor={1}
+                    polygonOffsetUnits={1}
+                  />
+                </mesh>
+              )}
+              
+              {/* 
+                LEADER PHOTOGRAPH
+                =================
+                The actual leader photograph. Always rendered regardless of hologram settings.
+                Uses alpha testing for clean edges and proper transparency.
+              */}
               <mesh geometry={planeGeometry} position={[0,0,0.0005]} renderOrder={isExpanded ? 103 : 12}>
                 <meshBasicMaterial
                   map={tex}

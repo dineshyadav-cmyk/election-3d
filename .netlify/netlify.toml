@@ -12,13 +12,13 @@ autoLaunch = false
 [functions."*"]
 
 [build]
-publish = "/Users/nehasapra/Bihar Elections/bihar-assembly-new-backup-20250830-215034/build"
+publish = "/Users/nehasapra/Bihar Elections/bihar-assembly-new-stable-layout-hologram-party-color/build"
 publishOrigin = "config"
 commandOrigin = "config"
 command = "npm run build"
 
 [build.environment]
-NODE_VERSION = "18"
+NODE_VERSION = "20"
 
 [build.processing]
 

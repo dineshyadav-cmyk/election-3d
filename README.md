@@ -1,149 +1,223 @@
-## Election Timeline Visualization (Prototype)
+# Bihar Assembly 3D Visualization
 
-Non‑technical summary: This app shows the Bihar Assembly seating in 3D. As you move the time slider, seat holograms recolor to show which alliance is currently winning (solid color) or only leading (lighter shade). Everything is pre‑computed locally; no live data feed yet.
+A real-time 3D visualization of the Bihar Legislative Assembly for election result tracking and live broadcasting.
 
-Added features (prototype stage):
+## 🏛️ Features
 
-* Hologram occupants above each of the 243 seats (instanced meshes) now recolor by alliance as you scrub the timeline (10:00–15:00, 30‑min steps).
-* Color mapping: each alliance owns pre-defined seat blocks (static). For each snapshot: first N wins seats get the solid alliance color, next M leads seats get a lighter shade, remainder neutral gray.
-* LIVE state = last snapshot.
-* Legend (top-right) shows per-alliance wins (W) and leads (L) counts for current snapshot.
+### Core Assembly Layout
+- **243 Seats**: Accurately positioned in 6-spoke radial arc layout
+- **Speaker's Dais**: Central podium with elevated chair
+- **5-Spoke Radial Design**: 
+  - Spokes 1 & 6: 50 seats each (outer wings)
+  - Spokes 2 & 5: 50 seats each (inner wings) 
+  - Central split: 22 seats (right) + 21 seats (left)
+- **Walkways**: Consistent spacing between spokes for realistic assembly hall feel
 
-Implementation notes (plain language):
-* Current hologram coloring groups seats by hex color (one InstancedMesh per distinct shade) to avoid driver inconsistencies with per-instance vertex color buffers.
-* Seat indices are zero-based internally; visible numbering (markers) is 1..243.
-* Data source: `src/data/electionTimeline.json` (placeholder sample counts).
+### Party Color Visualization
+- **Dynamic Theming**: Complete party-based color coding system
+- **Flag-Controlled**: Toggle between hologram and party-colored modes
+- **Comprehensive Coverage**: Wood, fabric, and bench materials all themed by party
+- **Mobile-Optimized**: Touch-friendly interface for mobile devices
 
-Planned improvements (next candidates):
-* Smooth fade transitions between snapshots.
-* Dynamic allocation or carving out block for OTHERS once distribution strategy decided.
-* Accessibility: optional high-contrast / daltonism-friendly palette.
-* Performance benchmarking and potential merge of color groups if palette expands.
+### Timeline Controls
+- **Seek Bar**: Navigate through election timeline
+- **Live/Replay Modes**: Switch between real-time and historical data
+- **Responsive Design**: Mobile-first approach with touch controls
 
-Housekeeping already done:
-* Removed deprecated `SeatStateContext` (replaced by direct prop + grouped instancing approach).
-* Simplified props (`AssemblyLayout` no longer receives unused float color buffer).
-* Added concise legend component `ResultsLegend.jsx`.
-* Silenced noisy build warnings (removed dev logs + pinned dependency to avoid Node engine warning). Source-map missing file warning from a third-party library is non-impacting and ignored.
-# Bihar Legislative Assembly 3D Visualization
+## 🎨 Party Color System
 
-A React-based 3D visualization of the Bihar Legislative Assembly using Three.js and React Three Fiber. This project represents a complete, production-ready 3D legislative chamber with 243 seats arranged in a sophisticated 5-Spoke Radial Arc layout.
+### When `PARTY_MAPPING_WITH_SEAT_COLOR = true`:
+- **NDA Alliance**: Saffron (#FFB347) - Complete seat theming
+- **INDIA Bloc**: Green (#2ECC40) - Complete seat theming  
+- **Others**: Lavender (#B39DFF) - Complete seat theming
+- **Undecided**: Gray (#777777) - Complete seat theming
+- **Photographs**: Preserved with hologram effects removed
 
-## 🎯 Project Status: Layout Complete & Camera Optimized
+### When `PARTY_MAPPING_WITH_SEAT_COLOR = false`:
+- **Original Mode**: Brown wood, teal fabric, hologram effects
+- **Hologram Effects**: Glow and panel effects around leader photos
 
-**Current Achievement**: The 5-Spoke Radial Arc layout has been successfully implemented with perfect camera framing, professional studio environment, and Speaker's Dais integration. The assembly is now ready for high-fidelity seat model upgrades.
+## 🏗️ Technical Architecture
 
-**Latest Checkpoint**: `bihar-assembly-checkpoint-5-spoke-fix` - Layout algorithm perfected, camera optimization complete, all 243 seats properly positioned and oriented.
+### Key Components
 
-## Assembly Layout: The 5-Spoke Radial Arc
+#### `AssemblyLayout.jsx`
+- **Main Layout Engine**: Generates 243 seats with precise positioning
+- **Party Grouping Logic**: Groups seats by alliance for efficient rendering
+- **Material Management**: Creates dynamic materials per party color
+- **Bench Integration**: Extends party colors to desk surfaces
 
-The 3D visualization uses a custom semi-circular layout designed for 243 seats. This layout is structured as five distinct "spokes" or wedges of seats, separated by four wide walkways to ensure visual clarity and realism.
+#### `ParliamentChairBlueprint.js`
+- **Geometry Factory**: Creates merged geometries for wood and fabric parts
+- **Material Creation**: Dynamic material generation for party colors
+- **Performance Optimized**: Uses InstancedMesh for 243 seats with minimal draw calls
 
-### Overall Structure:
-- **Total Seats:** 243
-- **Total Spokes:** 5 (1 Central, 4 Side)
-- **Central Aisle:** A wide central aisle splits the Central Spoke and divides the chamber into Government and Opposition sides.
+#### `SeatFacesLayer.jsx`
+- **Photo Management**: Renders leader photographs on each seat
+- **Hologram Control**: Conditional rendering of glow and panel effects
+- **Interactive Features**: Click handlers for seat expansion
 
-### Seat Distribution:
-- **Central Spoke (1):** 43 seats, split into a 21-seat Opposition block and a 22-seat Government block.
-- **Side Spokes (4):** 50 seats each (2 on the Opposition side, 2 on the Government side).
+#### `SpeakerDais.jsx`
+- **Central Podium**: Speaker's elevated platform and chair
+- **Consistent Theming**: Matches assembly chair design language
 
-### Row Breakdown per Spoke:
-
-**50-Seat Side Spoke Layout (5 Rows):**
-- Row 1: 8 seats
-- Row 2: 9 seats
-- Row 3: 10 seats
-- Row 4: 11 seats
-- Row 5: 12 seats
-
-**43-Seat Central Spoke Layout (5 Rows):**
-- **Opposition Half (21 seats):** Rows of 3, 4, 4, 5, 5 seats.
-- **Government Half (22 seats):** Rows of 4, 4, 5, 5, 4 seats.
-
-## Features
-
-- **Orthographic Camera**: Perfect framing of the entire assembly with comfortable margins
-- **243-Seat Assembly**: Complete legislative chamber visualization
-- **Professional Studio Environment**: High-quality lighting and shadows
-- **Responsive Design**: Optimized for various screen sizes
-- **Interactive Leader Detail Overlay**: Click (tap release without drag) on any seat face card to trigger a shared‑element style transition from its 3D position into a glass dialog with leader info. Dragging instead of releasing cancels the click (prevents accidental opens while orbiting). Overlay supports:
-   * Shared element animation using projected screen rectangle
-   * Escape key to close + backdrop click
-   * Initial keyboard focus on close control (accessibility)
-   * Future extensibility: constituency, dynamic stats
-
-## Technology Stack
-
-- React 18
-- Three.js
-- React Three Fiber
-- React Three Drei
+### Performance Optimizations
+- **InstancedMesh Rendering**: Single draw call per party color group
+- **Geometry Merging**: Combined wood/fabric parts for efficiency
+- **Conditional Rendering**: Flag-based optimization paths
+- **Memory Management**: Efficient material and geometry reuse
 
 ## 🚀 Getting Started
 
-### Development Workflow (Recommended)
-**Note**: The `npm start` command is known to hang on this system. Use the build-and-serve approach instead.
+### Prerequisites
+- Node.js 20.x (see package.json engines)
+- npm or yarn package manager
 
-### Requirements
-* Node.js 20.x (project enforces via `.nvmrc` & `engines`)
-* npm 10+
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Build the project (CI treats warnings as errors):**
-   ```bash
-   npm run build
-   ```
-
-3. **Serve the production build (preview mode):**
-   ```bash
-   npx serve -s build -l 3001
-   ```
-
-4. **Open your browser** and navigate to `http://localhost:3001`
-
-### Alternative: Quick Development Server
-If you prefer to try the development server:
+### Installation
 ```bash
+# Clone the repository
+cd "bihar-assembly-new-stable-layout-hologram-party-color"
+
+# Install dependencies
+npm install
+
+# Start development server
 npm start
 ```
-**Warning**: This may hang and require manual termination.
 
-### Camera Presets & Close Zoom
-The default view auto-applies the Gallery preset (elevated oblique). A Speaker POV preset frames from the dais. Close zoom behavior includes:
-* min distance 0.5m with soft floor stabilization at 0.6m
-* lateral offset when extremely close to avoid clipping hologram face cards
-* dynamic toggle of dolly-to-cursor below distance 5 to prevent jitter
-* double-click a seat to focus (focus distance 6m) / press `f` to re-focus / `Esc` to reset
-
-### Scripts
+### Development Commands
 ```bash
-npm run lint      # eslint check
-npm run format    # prettier write
-npm test          # jest tests (includes seat matrix count regression)
+# Start development server
+npm start
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+
+# Validate seat layout logic
+npm run validate:seats
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
 ```
 
-### Testing
-A lightweight regression test asserts we always produce 243 seat matrices. Extend this with per-spoke distribution if refactors occur.
+## 📊 Data Structure
 
-## 🏗️ Project Structure
+### Alliance Configuration (`src/config/alliances.js`)
+```javascript
+export const ALLIANCES = [
+  { id: 'NDA', name: 'NDA', color: '#FFB347' },       // Saffron
+  { id: 'INDIA', name: 'INDIA Bloc', color: '#2ECC40' }, // Green  
+  { id: 'OTHERS', name: 'Others', color: '#B39DFF' }   // Lavender
+];
+```
 
-### Core Components
-- `src/components/AssemblyLayout.jsx` - **5-Spoke Radial Arc layout algorithm** with 243-seat positioning
-- `src/components/ParliamentSeat.jsx` - **High-fidelity individual seat component** (desk + chair with materials)
-- `src/components/StudioEnvironment.jsx` - **Professional studio lighting** with ambient, key, and rim lights
-- `src/components/SpeakerDais.jsx` - **Speaker's podium and chair** positioned at assembly center
+### Seat Layout Mapping
+- **Seat Indices 0-49**: Spoke 1 (50 seats)
+- **Seat Indices 50-99**: Spoke 2 (50 seats)
+- **Seat Indices 100-121**: Central Right (22 seats)
+- **Seat Indices 122-142**: Central Left (21 seats)
+- **Seat Indices 143-192**: Spoke 5 (50 seats)
+- **Seat Indices 193-242**: Spoke 6 (50 seats)
 
-### Main Application
-- `src/App.js` - **Main application** with orthographic camera setup, perfect framing, and scene composition
+## 🎯 Election Day Usage
 
-### Layout Algorithm Features
-- **243 seats** arranged in 5 distinct spokes
-- **200-degree semi-circular arc** with perfect symmetry
-- **Opposition/Government split** with central aisle
-- **Dynamic camera framing** with comfortable margins
-- **Professional studio environment** with shadows and lighting
+### Real-Time Updates
+1. **Data Integration**: Connect to election result APIs
+2. **Timeline Scrubbing**: Navigate through election progression
+3. **Party Color Updates**: Dynamic seat coloring based on results
+4. **Live Broadcasting**: Optimized for TV/web streaming
+
+### Mobile Experience
+- **Touch Controls**: Swipe timeline, pinch zoom
+- **Responsive UI**: Adaptive layout for all screen sizes
+- **Performance**: Optimized for mobile devices
+
+## 🔧 Configuration
+
+### Feature Flags
+```javascript
+// AssemblyLayout.jsx - Line 9
+const PARTY_MAPPING_WITH_SEAT_COLOR = true; // Toggle party coloring
+```
+
+### Customization Points
+- **Colors**: Modify alliance colors in `alliances.js`
+- **Layout**: Adjust spoke angles and spacing in `AssemblyLayout.jsx`
+- **Materials**: Customize wood/fabric properties in `ParliamentChairBlueprint.js`
+- **Timeline**: Configure seek bar behavior in `TimelineBar.jsx`
+
+## 📱 Deployment
+
+### Local Development
+- **Development Server**: http://localhost:3000
+- **Hot Reload**: Automatic refresh on code changes
+- **Debug Tools**: React DevTools integration
+
+### Production Build
+```bash
+npm run build
+npm run preview  # Test production build locally
+```
+
+### Hosting Options
+- **Netlify**: `npm run deploy:preview` / `npm run deploy:prod`
+- **Vercel**: Automatic deployment from Git
+- **Static Hosting**: Any CDN supporting SPA routing
+
+## 🐛 Troubleshooting
+
+### Common Issues
+1. **Compilation Errors**: Check Node.js version (requires 20.x)
+2. **Performance Issues**: Verify InstancedMesh usage and geometry merging
+3. **Color Not Updating**: Check `PARTY_MAPPING_WITH_SEAT_COLOR` flag
+4. **Mobile Issues**: Test touch events and responsive breakpoints
+
+### Debug Mode
+- **Console Logging**: Enable detailed seat positioning logs
+- **Visual Markers**: Temporary numbered dots for seat verification
+- **Performance Metrics**: Monitor draw calls and frame rates
+
+## 📈 Future Enhancements
+
+### Planned Features
+- [ ] Real-time data integration
+- [ ] Advanced animations (confetti, transitions)
+- [ ] Sound effects for major wins
+- [ ] Multi-language support
+- [ ] Accessibility improvements
+- [ ] Advanced camera controls
+
+### Technical Improvements
+- [ ] WebGL optimization for older devices
+- [ ] Progressive loading for large datasets
+- [ ] Enhanced mobile touch controls
+- [ ] Performance monitoring dashboard
+
+## 🤝 Contributing
+
+### Code Standards
+- **ESLint**: Enforced code style and error detection
+- **Prettier**: Automatic code formatting
+- **Comments**: Comprehensive inline documentation
+- **TypeScript**: Consider migration for better type safety
+
+### Development Workflow
+1. **Feature Branch**: Create branch for new features
+2. **Documentation**: Update README and inline comments
+3. **Testing**: Validate on multiple devices/browsers
+4. **Performance**: Check draw calls and frame rates
+5. **Review**: Code review before merge
+
+## 📄 License
+
+This project is developed for Bihar Assembly election visualization and broadcasting.
+
+---
+
+**Built with React Three Fiber, Three.js, and modern web technologies for immersive 3D election result visualization.**

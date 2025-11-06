@@ -1,183 +1,266 @@
 import React from 'react';
 
+// ========================================
+// SPEAKER DAIS CONFIGURATION
+// ========================================
+const DAIS_CONFIG = {
+  // Main container position
+  position: [0, 0, -6],  // Moved 4m forward toward assembly
+  rotation: [0, Math.PI, 0],
+  
+  // Backstage wall position (matches BackstageWall.jsx wallZ)
+  backstageWallZ: -16,  // Wall also moves forward by 4m (was -20, now -16)
+  
+  // Platform (old flat base - will be removed/replaced)
+  platform: {
+    width: 8.0,
+    depth: 3.0,
+    height: 0.15,
+    color: 0x654321,
+  },
+  
+  // Chair Platform (elevated dais)
+  // Parent group at world Z=-10, wall at world Z=-20 (10m distance)
+  // Due to 180° rotation: local +Z goes to world -Z
+  // Platform extends 10m backward in local coords → 10m backward in world
+  // Depth: 10m, Center: +5m (local)
+  chairPlatform: {
+    width: 8.0,       // 8m wide - stairs start at X=±4m
+    depth: 10,        // Reaches backstage wall at world Z=-20 (10m from parent)
+    height: 2.25,     // 2.25m tall (achieves 2.7m seat elevation)
+    offsetZ: 5,       // Centered between 0 and 10
+    color: 0x654321,  // Dark wood/stone color
+  },
+  
+  // Table (solid wooden block) - STEP 1
+  table: {
+    width: 12.0,      // 12m wide (increased prominence)
+    height: 3.0,      // 3m tall (more imposing)
+    depth: 1.0,
+    offsetZ: -0.5,    // Position in front of chair
+    color: 0x8B5A2B,  // Wood color
+  },
+  
+  // Screen on table
+  screen: {
+    width: 0.5,
+    height: 0.4,
+    thickness: 0.05,
+    offsetY: 0.3,     // Above table top
+    color: 0x111111,
+  },
+  
+  // Staircases (left and right) - STEPS 3 & 4
+  stairs: {
+    stepCount: 5,          // 5 steps to reach 2.25m platform
+    stepHeight: 0.45,      // 0.45m per step (5 × 0.45 = 2.25m)
+    stepDepth: 0.8,        // 0.8m deep (comfortable step size)
+    stairWidth: 2.0,       // 2m wide stairs
+    leftStartX: -6.0,      // Left staircase starts at left edge of wider table (12m)
+    rightStartX: 6.0,      // Right staircase starts at right edge of wider table (12m)
+    offsetZ: 1.5,          // Same Z as platform center
+    color: 0x654321,       // Same color as platform
+  },
+  
+  // Speaker's chair
+  chair: {
+    seatWidth: 0.7,
+    seatDepth: 0.7,
+    seatHeight: 0.45,
+    seatThickness: 0.15,
+    
+    backrestWidth: 0.9,
+    backrestHeight: 1.2,
+    backrestThickness: 0.1,
+    
+    armrestWidth: 0.12,
+    armrestHeight: 0.35,
+    armrestDepth: 0.5,
+    
+    baseWidth: 0.9,
+    baseDepth: 0.8,
+    baseHeight: 0.12,
+    
+    pedestalWidth: 0.75,
+    pedestalDepth: 0.7,
+    pedestalHeight: 0.25,
+    
+    offsetZ: 0.6,     // Chair behind table (0.6m behind table back edge)
+    
+    fabricColor: 0x008080,
+    woodColor: 0x8B5A2B,
+  }
+};
+
 const SpeakerDais = React.memo(function SpeakerDais() {
+  const c = DAIS_CONFIG;
+  const chair = c.chair;
+  
   return (
-    // ========================================
-    // MAIN CONTAINER: Speaker's Dais Assembly
-    // ========================================
-    // This group contains the entire Speaker's platform
-    // Position: 10 units in front of the parliament seat (negative Z = forward)
-    // Rotation: 180° to face the assembly (Math.PI = 180 degrees)
-    <group 
-      position={[0, 0, -10.0]} 
-      rotation={[0, Math.PI, 0]} 
-    >
+    <group position={c.position} rotation={c.rotation}>
       
       {/* ========================================
-          SECTION 1: SPEAKER'S PODIUM (Foundation)
-          ========================================
-          This is the solid, imposing base that the Speaker stands behind.
-          It serves as both a desk surface and a visual barrier. */}
-      
-      {/* Main Podium Block - Solid Foundation */}
-      <mesh position={[0, 1.75, 0]}>
-        {/* 
-          Dimensions: 10.0 wide × 3.5 tall × 2.5 deep
-          Position Y: 1.75 centers the 3.5 height block vertically
-          This creates a solid podium from ground level up
-        */}
-        <boxGeometry args={[10.0, 3.5, 2.5]} />
+          CHAIR PLATFORM (Elevated Dais) - STEP 2
+          Height: 2.0m (below table top at 2.5m)
+          Chair sits on this platform
+          ======================================== */}
+      <mesh position={[0, c.chairPlatform.height / 2, c.chairPlatform.offsetZ]}>
+        <boxGeometry args={[c.chairPlatform.width, c.chairPlatform.height, c.chairPlatform.depth]} />
         <meshStandardMaterial 
-          color={0x8B5A2B} // Brown Wood Material (same as parliamentSeat)
-          roughness={0.4}  // Semi-gloss finish
-          metalness={0.1}  // Subtle sheen
-        />
-      </mesh>
-      
-      {/* Black Screen Device - On Top of Podium */}
-      <mesh position={[0, 3.35, 0]}>
-        {/* 
-          Dimensions: 1.0 wide × 0.6 tall × 0.1 deep (thin screen)
-          Position Y: 3.35 places it on top of the podium (1.75 + 3.5/2 + 0.6/2)
-          This represents the Speaker's computer/monitor
-        */}
-        <boxGeometry args={[1.0, 0.6, 0.1]} />
-        <meshStandardMaterial 
-          color={0x111111} // Black Screen Material (same as parliamentSeat)
-          roughness={0.2}  // Smooth, reflective surface
-          metalness={0.0}  // Non-metallic
+          color={c.chairPlatform.color} 
+          roughness={0.5} 
+          metalness={0.1} 
         />
       </mesh>
       
       {/* ========================================
-          SECTION 2: SPEAKER'S CHAIR (Seating)
-          ========================================
-          This is the Speaker's throne-like chair positioned behind the podium.
-          It's elevated and has a dramatically taller backrest for authority. */}
+          TABLE (Solid Wooden Block) - STEP 1
+          Height: 2.5m (slightly above Row 5's 1.6m)
+          No legs, just a solid wood block on ground
+          ======================================== */}
+      <mesh position={[0, c.table.height / 2, c.table.offsetZ]}>
+        <boxGeometry args={[c.table.width, c.table.height, c.table.depth]} />
+        <meshStandardMaterial 
+          color={c.table.color} 
+          roughness={0.4} 
+          metalness={0.1} 
+        />
+      </mesh>
       
-      {/* Chair Assembly Group - All chair parts together */}
-      <group 
-        position={[0, 2.1, 2.5]} // Lifted to ground legs on same plane as podium
-        rotation={[0, Math.PI, 0]} // Chair faces the podium (180° rotation)
-      >
-        {/* 
-          POSITIONING LOGIC:
-          - X: 0 (centered behind podium)
-          - Y: 2.1 (lifted to ground legs on same plane as podium base)
-          - Z: 2.5 (comfortable distance behind podium)
-          
-          ROTATION LOGIC:
-          - Chair naturally faces forward (toward negative Z)
-          - We rotate 180° so it faces the podium (positive Z)
-          - This ensures the Speaker faces their desk
-        */}
+      {/* Screen on table */}
+      <mesh position={[
+        0,
+        c.table.height + c.screen.offsetY,
+        c.table.offsetZ
+      ]}>
+        <boxGeometry args={[c.screen.width, c.screen.height, c.screen.thickness]} />
+        <meshStandardMaterial color={c.screen.color} roughness={0.2} metalness={0.0} />
+      </mesh>
+      
+      {/* ========================================
+          STAIRCASES - STEPS 3 & 4
+          Steps extend along platform depth (Z direction)
+          Visible as incline from assembly view
+          ======================================== */}
+      {/* Left Staircase (GROUNDED - like tiered platforms) */}
+      {Array.from({ length: c.stairs.stepCount }).map((_, stepIndex) => {
+        const stepNum = c.stairs.stepCount - stepIndex; // 4, 3, 2, 1 (reversed!)
+        const totalStepHeight = stepNum * c.stairs.stepHeight; // 2.0, 1.5, 1.0, 0.5 (from ground)
         
-        {/* ========================================
-            CHAIR COMPONENT 1: SEAT CUSHION
-            ========================================
-            The horizontal surface the Speaker sits on */}
-        <mesh position={[0, 0.2, 0]}>
-          {/* 
-            Dimensions: 1.0 wide × 0.2 tall × 1.0 deep
-            Position Y: 0.2 raises the cushion above the leg level
-            This creates a comfortable sitting height
-          */}
-          <boxGeometry args={[1.0, 0.2, 1.0]} />
-          <meshStandardMaterial 
-            color={0x008080} // Green Fabric Material (same as parliamentSeat)
-            roughness={0.9}  // Matte, non-reflective fabric look
-            metalness={0.0}  // Non-metallic
-          />
+        // Steps extend along platform depth (match platform Z range)
+        const stepDepth = c.chairPlatform.depth; // Full depth of platform (3m)
+        const stepZ = c.chairPlatform.offsetZ; // Same Z center as platform
+        
+        return (
+          <mesh
+            key={`left-step-${stepNum}`}
+            position={[
+              -c.chairPlatform.width / 2 - (stepIndex + 0.5) * c.stairs.stepDepth, // X: extend outward
+              totalStepHeight / 2,                                                   // Y: center (grounded at Y=0)
+              stepZ                                                                  // Z: along platform
+            ]}
+          >
+            <boxGeometry args={[c.stairs.stepDepth, totalStepHeight, stepDepth]} />
+            <meshStandardMaterial 
+              color={c.stairs.color} 
+              roughness={0.5} 
+              metalness={0.1} 
+            />
+          </mesh>
+        );
+      })}
+      
+      {/* Right Staircase (GROUNDED - like tiered platforms) */}
+      {Array.from({ length: c.stairs.stepCount }).map((_, stepIndex) => {
+        const stepNum = c.stairs.stepCount - stepIndex; // 4, 3, 2, 1 (reversed!)
+        const totalStepHeight = stepNum * c.stairs.stepHeight; // 2.0, 1.5, 1.0, 0.5 (from ground)
+        
+        // Steps extend along platform depth (match platform Z range)
+        const stepDepth = c.chairPlatform.depth; // Full depth of platform (3m)
+        const stepZ = c.chairPlatform.offsetZ; // Same Z center as platform
+        
+        return (
+          <mesh
+            key={`right-step-${stepNum}`}
+            position={[
+              c.chairPlatform.width / 2 + (stepIndex + 0.5) * c.stairs.stepDepth, // X: extend outward
+              totalStepHeight / 2,                                                  // Y: center (grounded at Y=0)
+              stepZ                                                                 // Z: along platform
+            ]}
+          >
+            <boxGeometry args={[c.stairs.stepDepth, totalStepHeight, stepDepth]} />
+            <meshStandardMaterial 
+              color={c.stairs.color} 
+              roughness={0.5} 
+              metalness={0.1} 
+            />
+          </mesh>
+        );
+      })}
+      
+      {/* ========================================
+          SPEAKER'S CHAIR
+          Now positioned on top of elevated platform (Y=2.25m)
+          Uses chair.offsetZ for proper gap from table
+          ======================================== */}
+      <group position={[0, c.chairPlatform.height, c.chair.offsetZ]} rotation={[0, Math.PI, 0]}>
+        
+        {/* Base plinth */}
+        <mesh position={[0, chair.baseHeight / 2, 0]}>
+          <boxGeometry args={[chair.baseWidth, chair.baseHeight, chair.baseDepth]} />
+          <meshStandardMaterial color={chair.woodColor} roughness={0.4} metalness={0.1} />
         </mesh>
         
-        {/* ========================================
-            CHAIR COMPONENT 2: BACKREST
-            ========================================
-            The vertical support behind the Speaker - dramatically tall for authority */}
-        <mesh position={[0, 2.7, -0.45]}>
-          {/* 
-            Dimensions: 1.5 wide × 5.4 tall × 0.1 deep
-            Position Y: 2.7 centers the 5.4 height backrest above the seat
-            Position Z: -0.45 places it at the back edge of the seat
-            Height: 5.4 is 3x the original height for dramatic authority
-            Width: 1.5 for more commanding presence
-          */}
-          <boxGeometry args={[1.5, 5.4, 0.1]} />
-          <meshStandardMaterial 
-            color={0x008080} // Green Fabric Material (same as seat cushion)
-            roughness={0.9}  // Matte, non-reflective fabric look
-            metalness={0.0}  // Non-metallic
-          />
+        {/* Pedestal */}
+        <mesh position={[0, chair.baseHeight + chair.pedestalHeight / 2, 0]}>
+          <boxGeometry args={[chair.pedestalWidth, chair.pedestalHeight, chair.pedestalDepth]} />
+          <meshStandardMaterial color={chair.woodColor} roughness={0.4} metalness={0.1} />
         </mesh>
         
-        {/* ========================================
-            CHAIR COMPONENT 3: PLINTH BASE + PEDESTAL (no legs)
-            ======================================== */}
-        {/* Plinth base */}
-        <mesh position={[0, -0.6 - 0.14 / 2, 0]}>
-          <boxGeometry args={[1.3, 0.14, 1.2]} />
-          <meshStandardMaterial color={0x8B5A2B} roughness={0.4} metalness={0.1} />
-        </mesh>
-        {/* Solid pedestal up to seat underside */}
-        <mesh position={[0, -0.2, 0]}>
-          <boxGeometry args={[1.1, 0.8, 1.0]} />
-          <meshStandardMaterial color={0x8B5A2B} roughness={0.4} metalness={0.1} />
+        {/* Seat cushion */}
+        <mesh position={[0, chair.baseHeight + chair.pedestalHeight + chair.seatThickness / 2, 0]}>
+          <boxGeometry args={[chair.seatWidth, chair.seatThickness, chair.seatDepth]} />
+          <meshStandardMaterial color={chair.fabricColor} roughness={0.9} metalness={0.0} />
         </mesh>
         
-        {/* ========================================
-            CHAIR COMPONENT 4: ARMRESTS
-            ========================================
-            The horizontal supports on either side of the seat */}
-        
-        {/* Right Armrest */}
-        <mesh position={[0.575, 0.5, 0]}>
-          {/* 
-            Dimensions: 0.15 wide × 0.4 tall × 0.8 deep
-            Position X: 0.575 (extends beyond right edge of seat)
-            Position Y: 0.5 (comfortable arm height above seat)
-            Position Z: 0 (centered on seat)
-          */}
-          <boxGeometry args={[0.15, 0.4, 0.8]} />
-          <meshStandardMaterial 
-            color={0x8B5A2B} // Brown Wood Material (same as legs)
-            roughness={0.4}
-            metalness={0.1}
-          />
+        {/* Backrest */}
+        <mesh position={[
+          0,
+          chair.baseHeight + chair.pedestalHeight + chair.seatThickness + chair.backrestHeight / 2,
+          -chair.seatDepth / 2 + chair.backrestThickness / 2
+        ]}>
+          <boxGeometry args={[chair.backrestWidth, chair.backrestHeight, chair.backrestThickness]} />
+          <meshStandardMaterial color={chair.fabricColor} roughness={0.9} metalness={0.0} />
         </mesh>
         
-        {/* Left Armrest */}
-        <mesh position={[-0.575, 0.5, 0]}>
-          {/* 
-            Dimensions: 0.15 wide × 0.4 tall × 0.8 deep
-            Position X: -0.575 (extends beyond left edge of seat)
-            Position Y: 0.5 (comfortable arm height above seat)
-            Position Z: 0 (centered on seat)
-          */}
-          <boxGeometry args={[0.15, 0.4, 0.8]} />
-          <meshStandardMaterial 
-            color={0x8B5A2B}
-            roughness={0.4}
-            metalness={0.1}
-          />
+        {/* Left armrest */}
+        <mesh position={[
+          -chair.seatWidth / 2 - chair.armrestWidth / 2,
+          chair.baseHeight + chair.pedestalHeight + chair.seatThickness + chair.armrestHeight / 2,
+          0
+        ]}>
+          <boxGeometry args={[chair.armrestWidth, chair.armrestHeight, chair.armrestDepth]} />
+          <meshStandardMaterial color={chair.woodColor} roughness={0.4} metalness={0.1} />
         </mesh>
         
-        {/* ========================================
-            CHAIR COMPONENT 5: HEADREST TRIM
-            ========================================
-            The wooden trim piece on top of the tall backrest */}
-        <mesh position={[0, 5.4, -0.45]}>
-          {/* 
-            Dimensions: 1.6 wide × 0.1 tall × 0.15 deep
-            Position Y: 5.4 (at the very top of the 5.4 tall backrest)
-            Position Z: -0.45 (aligned with backrest)
-            Width: 1.6 (slightly wider than backrest for trim effect)
-          */}
-          <boxGeometry args={[1.6, 0.1, 0.15]} />
-          <meshStandardMaterial 
-            color={0x8B5A2B} // Brown Wood Material (same as armrests)
-            roughness={0.4}
-            metalness={0.1}
-          />
+        {/* Right armrest */}
+        <mesh position={[
+          chair.seatWidth / 2 + chair.armrestWidth / 2,
+          chair.baseHeight + chair.pedestalHeight + chair.seatThickness + chair.armrestHeight / 2,
+          0
+        ]}>
+          <boxGeometry args={[chair.armrestWidth, chair.armrestHeight, chair.armrestDepth]} />
+          <meshStandardMaterial color={chair.woodColor} roughness={0.4} metalness={0.1} />
+        </mesh>
+        
+        {/* Headrest trim on top of backrest */}
+        <mesh position={[
+          0,
+          chair.baseHeight + chair.pedestalHeight + chair.seatThickness + chair.backrestHeight + 0.05,
+          -chair.seatDepth / 2 + chair.backrestThickness / 2
+        ]}>
+          <boxGeometry args={[chair.backrestWidth + 0.1, 0.1, chair.backrestThickness + 0.05]} />
+          <meshStandardMaterial color={chair.woodColor} roughness={0.4} metalness={0.1} />
         </mesh>
         
       </group>

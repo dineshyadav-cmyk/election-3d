@@ -6,11 +6,19 @@ import EnhancedCameraControls from './components/EnhancedCameraControls';
 import './App.css';
 import StudioEnvironment from './components/StudioEnvironment';
 import SpeakerDais from './components/SpeakerDais';
-import AssemblyLayout from './components/AssemblyLayout';
+import Floor from './components/Floor';
+import BackstageWall from './components/BackstageWall';
+import TieredPlatforms from './components/TieredPlatforms';
+import CameraViewpoints from './components/CameraViewpoints';
+import Room from './components/Room';
+// import AssemblyLayout from './components/AssemblyLayout';
+import AssemblyLayout from './components/AssemblyLayoutV2';
 import ResultsLegend from './components/ResultsLegend';
 import LeaderDetailOverlay from './components/LeaderDetailOverlay';
 import SpeakerChairIcon from './components/icons/SpeakerChairIcon';
 import TimelineBar from './components/TimelineBar'; // Time seek bar
+// import ViewToggleButton from './components/ViewToggleButton'; // Removed - using navigation dots instead
+import NavigationDots from './components/NavigationDots';
 // OLD imports (before Redux migration):
 // import biharTimeline from './data/biharElectionTimeline.json';
 // import { getBiharElectionData } from './services/electionAPI';
@@ -18,7 +26,7 @@ import TimelineBar from './components/TimelineBar'; // Time seek bar
 // NEW Redux imports:
 import { 
   fetchBiharElectionData,
-  selectElectionData,
+  // selectElectionData, // Currently unused
   selectConstituencyData,
   selectCurrentTimeline,
   selectCurrentIndex,
@@ -52,7 +60,7 @@ function App() {
   // const [error, setError] = useState(null);
 
   // NEW Redux state:
-  const electionData = useSelector(selectElectionData);
+  // const electionData = useSelector(selectElectionData); // Currently unused
   const constituencyData = useSelector(selectConstituencyData);
   const currentTimeline = useSelector(selectCurrentTimeline);
   const currentIndex = useSelector(selectCurrentIndex);
@@ -92,35 +100,47 @@ function App() {
 
   const shadeCache = useRef(new Map());
   const seatHexColors = useMemo(() => {
-    // Use API data timeline if available, otherwise fallback to static data
-    // const timelineData = electionData?.timeline || biharTimeline;
-    // const snap = timelineData[currentIndex];
-    
-    // Use Redux timeline data
-    const snap = currentTimeline[currentIndex];
+    // Use constituency data to get leader colors (lwcc/cc parameter)
     const seatCount = TOTAL_SEATS;
     const seatColorHex = new Array(seatCount).fill(UNDECLARED_COLOR);
-    const counts = {};
-    for (const a of snap.alliances) counts[a.id] = a;
-    for (const { id, color } of ALLIANCES) {
-      const block = seatMap[id] || [];
-      const data = counts[id];
-      if (!data) continue;
-      const { wins, leads } = data;
-      const cacheKey = color + '|0.65';
-      let leadShade = shadeCache.current.get(cacheKey);
-      if (!leadShade) {
-        leadShade = lighterShade(color, 0.65);
-        shadeCache.current.set(cacheKey, leadShade);
-      }
-      for (let i = 0; i < block.length; i += 1) {
-        const seatIdx = block[i];
-        if (i < wins) seatColorHex[seatIdx] = color;
-        else if (i < wins + leads) seatColorHex[seatIdx] = leadShade;
+    
+    // If constituency data is available, use leader colors from it
+    console.log('constituencyData:', constituencyData);
+    if (constituencyData && Array.isArray(constituencyData)) {
+      constituencyData.forEach(constituency => {
+        const seatIndex = constituency.cns_id - 1; // Convert to 0-based index
+        // Use candidate color if available (lwcc parameter)
+        const leaderColor = constituency.lwcc || constituency.candidate.cc || UNDECLARED_COLOR;
+        if (seatIndex >= 0 && seatIndex < seatCount) {
+          seatColorHex[seatIndex] = leaderColor;
+        }
+      });
+    } else {
+      // Fallback to timeline-based coloring if no constituency data
+      const snap = currentTimeline[currentIndex];
+      const counts = {};
+      for (const a of snap.alliances) counts[a.id] = a;
+      for (const { id, color } of ALLIANCES) {
+        const block = seatMap[id] || [];
+        const data = counts[id];
+        if (!data) continue;
+        const { wins, leads } = data;
+        const cacheKey = color + '|0.65';
+        let leadShade = shadeCache.current.get(cacheKey);
+        if (!leadShade) {
+          leadShade = lighterShade(color, 0.65);
+          shadeCache.current.set(cacheKey, leadShade);
+        }
+        for (let i = 0; i < block.length; i += 1) {
+          const seatIdx = block[i];
+          if (i < wins) seatColorHex[seatIdx] = color;
+          else if (i < wins + leads) seatColorHex[seatIdx] = leadShade;
+        }
       }
     }
+    
     return seatColorHex;
-  }, [currentIndex, seatMap, currentTimeline]);
+  }, [currentIndex, seatMap, currentTimeline, constituencyData]);
   // , electionData
 
   // Generate dynamic image sources based on constituency data (cns_rslt)
@@ -136,10 +156,13 @@ function App() {
     // Map constituency data to seat images using cns_id as seat index and lwpl as image ID
     constituencyData.forEach(constituency => {
       const seatIndex = constituency.cns_id - 1; // Convert to 0-based index (assuming cns_id is 1-based)
-      const imageId = constituency.lwpl;
+      // const imageId = constituency.lwpl;
       
-      if (seatIndex >= 0 && seatIndex < seatCount && imageId) {
-        seatImages[seatIndex] = `https://static.toiimg.com/photo/${imageId}.cms`;
+      // if (seatIndex >= 0 && seatIndex < seatCount && imageId) {
+      //   seatImages[seatIndex] = `https://static.toiimg.com/photo/${imageId}.cms`;
+      // }
+      if(constituency.candidate && constituency.candidate.src) {
+        seatImages[seatIndex] = constituency.candidate.src;
       }
     });
 
@@ -153,6 +176,8 @@ function App() {
   const [activePreset, setActivePreset] = useState(null);
   // const [expandedSeat, setExpandedSeat] = useState(null); // OLD - Now using Redux state
   const [expandedMeta, setExpandedMeta] = useState(null); // { imageSrc, partyColor }
+  
+  // Navigation dots will handle view changes internally
 
   const computeSphere = (mats) => {
     if (!mats || !mats.length) return null;
@@ -213,13 +238,13 @@ function App() {
     }
   };
 
-  // Auto-apply gallery preset on first availability (default view)
-  useEffect(() => {
-    if (camControls && sphere && activePreset == null) {
-      applyPreset('gallery');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camControls, sphere, activePreset]);
+  // Auto-apply gallery preset on first availability (default view) - DISABLED for bird's-eye view
+  // useEffect(() => {
+  //   if (camControls && sphere && activePreset == null) {
+  //     applyPreset('gallery');
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [camControls, sphere, activePreset]);
 
   // Get current timeline data for UI components (OLD - now using Redux)
   // const currentTimeline = electionData?.timeline || biharTimeline;
@@ -271,7 +296,7 @@ function App() {
             }}
             camera={{ fov: 26, near: 0.02, far: 2000, position: [0,70,120] }}
             onCreated={({ scene, gl }) => {
-              scene.background = new THREE.Color(0x000000);
+              scene.background = new THREE.Color(0x5A2F2F); // Match the room color
               gl.shadowMap.enabled = true;
               gl.shadowMap.type = THREE.PCFSoftShadowMap;
               // Ensure pixel ratio matches Canvas prop in some browsers
@@ -282,11 +307,21 @@ function App() {
             <EnhancedCameraControls getSeatWorldMatrix={() => ({ matrices: seatMatrices })} onReady={(cc) => setCamControls(cc)} />
             {/* Professional Studio Environment */}
             <StudioEnvironment />
+            {/* Room walls and ceiling */}
+            <Room />
+            {/* Camera Navigation Dots */}
+            <CameraViewpoints cameraControls={camControls} />
+            {/* Floor */}
+            <Floor />
+            {/* Backstage Wall */}
+            <BackstageWall />
+            {/* Tiered Platforms (semicircular stadium steps) */}
+            <TieredPlatforms />
             {/* Speaker's Dais */}
             <SpeakerDais />
             {/* Seat / benches assembly (takes computed per-seat colors for wins/leads) */}
-            {/* Vertical offset wrapper to nudge assembly upward visually */}
-            <group position={[0,5,0]}>
+            {/* Assembly grounded at Y=0 (same level as floor and speaker dais) */}
+            <group position={[0,0,0]}>
               <AssemblyLayout
                 seatHexColors={seatHexColors}
                 seatImageSources={seatImageSources}
@@ -298,6 +333,10 @@ function App() {
               />
             </group>
           </Canvas>
+          
+          {/* Navigation Dots */}
+          <NavigationDots />
+          
           {/* Timeline UI overlay (HTML) */}
           {/* <TimelineBar timeline={currentTimeline} currentIndex={currentIndex} onChange={setCurrentIndex} /> */}
           <TimelineBar timeline={currentTimeline} currentIndex={currentIndex} onChange={(index) => dispatch(setCurrentIndex(index))} />
